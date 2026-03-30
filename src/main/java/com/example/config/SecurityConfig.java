@@ -29,16 +29,9 @@ public class SecurityConfig {
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         // Allow all requests by default at the HTTP level (we rely on @PreAuthorize for
         // specific endpoints)
-        .authorizeHttpRequests(authz -> authz
-            // Public endpoints (no auth required)
-            .requestMatchers(
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/actuator/health")
-            .permitAll())
+        .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
         // Enable basic auth so we can test endpoints easily via curl/Postman
-        .httpBasic(basic -> {
-        })
+        .httpBasic(basic -> {})
         .build();
   }
 
@@ -48,15 +41,14 @@ public class SecurityConfig {
     // .roles()
     // so .roles("GLOBAL_ADMIN") becomes "ROLE_GLOBAL_ADMIN" internally, matching
     // the hasRole expression.
-    UserDetails admin = User.withUsername("admin")
-        .password(passwordEncoder.encode("admin"))
-        .roles("GLOBAL_ADMIN")
-        .build();
+    UserDetails admin =
+        User.withUsername("admin")
+            .password(passwordEncoder.encode("admin"))
+            .roles("GLOBAL_ADMIN")
+            .build();
 
-    UserDetails user = User.withUsername("user")
-        .password(passwordEncoder.encode("user"))
-        .roles("USER")
-        .build();
+    UserDetails user =
+        User.withUsername("user").password(passwordEncoder.encode("user")).roles("USER").build();
 
     return new InMemoryUserDetailsManager(admin, user);
   }

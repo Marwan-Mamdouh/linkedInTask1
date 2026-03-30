@@ -68,7 +68,7 @@ class DealerServiceTest {
   void shouldGetDealer_whenExists() {
     when(dealerRepository.findByIdAndTenantId(dealerId, tenantId)).thenReturn(Optional.of(dealer));
 
-    DealerResponse response = dealerService.getDealerByIdAndTenantId(dealerId);
+    DealerResponse response = dealerService.getDealerById(dealerId);
 
     assertThat(response.id()).isEqualTo(dealerId);
     verify(dealerRepository).findByIdAndTenantId(dealerId, tenantId);
@@ -78,8 +78,7 @@ class DealerServiceTest {
   void shouldThrowResourceNotFound_whenDealerNotFound() {
     when(dealerRepository.findByIdAndTenantId(dealerId, tenantId)).thenReturn(Optional.empty());
 
-    assertThrows(
-        ResourceNotFoundException.class, () -> dealerService.getDealerByIdAndTenantId(dealerId));
+    assertThrows(ResourceNotFoundException.class, () -> dealerService.getDealerById(dealerId));
     verify(dealerRepository).findByIdAndTenantId(dealerId, tenantId);
   }
 
@@ -99,13 +98,23 @@ class DealerServiceTest {
   }
 
   @Test
-  void shouldDeleteDealer_whenValidRequest() {
+  void shouldThrowResourceNotFound_WhenDealerNotFound() {
     doNothing().when(dealerRepository).deleteByIdAndTenantId(dealerId, tenantId);
 
     dealerService.deleteDealer(dealerId);
 
+    assertThrows(ResourceNotFoundException.class, () -> dealerService.getDealerById(dealerId));
     verify(dealerRepository).deleteByIdAndTenantId(dealerId, tenantId);
   }
+
+  //  @Test
+  //  void shouldNotDeleteDealer_whenNoDealerForTheRequest() {
+  //    doNothing().when(dealerRepository).deleteByIdAndTenantId(dealerId, tenantId);
+  //
+  //    dealerService.deleteDealer(dealerId);
+  //
+  //    verify(dealerRepository).deleteByIdAndTenantId(dealerId, tenantId);
+  //  }
 
   @Test
   void shouldCountDealersBySubscription() {

@@ -55,7 +55,9 @@ class DealerServiceImpl implements DealerService {
     var tenantId = TenantContext.getTenantId();
     log.info("create dealer request from tenant: {}", tenantId);
     createDealerValidator.validate(dealer);
-    return DealerMapper.toResponse(dealerRepository.save(DealerMapper.toEntity(dealer)));
+    var dealerEntity = DealerMapper.toEntity(dealer);
+    dealerEntity.setTenantId(tenantId);
+    return DealerMapper.toResponse(dealerRepository.save(dealerEntity));
   }
 
   @Transactional
@@ -76,6 +78,7 @@ class DealerServiceImpl implements DealerService {
   public void deleteDealer(UUID uuid) {
     var tenantId = TenantContext.getTenantId();
     log.info("delete dealer request from tenant: {}", tenantId);
+    this.getDealerById(uuid);
     dealerRepository.deleteByIdAndTenantId(uuid, tenantId);
   }
 

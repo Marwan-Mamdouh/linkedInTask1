@@ -8,6 +8,8 @@ import static org.mockito.Mockito.*;
 
 import com.example.common.exception.ResourceNotFoundException;
 import com.example.inventory.dealer.Dealer;
+import com.example.inventory.dealer.DealerMapper;
+import com.example.inventory.dealer.DealerResponse;
 import com.example.inventory.dealer.DealerService;
 import com.example.tenant.TenantContext;
 import java.math.BigDecimal;
@@ -40,6 +42,7 @@ class VehicleServiceTest {
   private final UUID dealerId = UUID.randomUUID();
   private final UUID vehicleId = UUID.randomUUID();
   private Dealer dealer;
+  private DealerResponse dealerResponse;
   private Vehicle vehicle;
 
   @BeforeEach
@@ -50,6 +53,8 @@ class VehicleServiceTest {
     dealer.setId(dealerId);
     dealer.setTenantId(tenantId);
     dealer.setName("Test Dealer");
+
+    dealerResponse = DealerMapper.toResponse(dealer);
 
     vehicle = new Vehicle();
     vehicle.setId(vehicleId);
@@ -72,7 +77,7 @@ class VehicleServiceTest {
             dealerId, "Test Model", new BigDecimal("10000.00"), VehicleStatus.AVAILABLE);
 
     doNothing().when(createVehicleValidator).validate(request);
-    when(dealerLookupService.getDealerOrThrow(dealerId, tenantId)).thenReturn(dealer);
+    when(dealerLookupService.getDealerById(dealerId)).thenReturn(dealerResponse);
     when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
     VehicleResponse response = vehicleService.save(request);
@@ -80,7 +85,7 @@ class VehicleServiceTest {
     assertThat(response.id()).isEqualTo(vehicleId);
     assertThat(response.model()).isEqualTo("Test Model");
     assertThat(response.dealerId()).isEqualTo(dealerId);
-    verify(dealerLookupService).getDealerOrThrow(dealerId, tenantId);
+    verify(dealerLookupService).getDealerById(dealerId);
     verify(vehicleRepository).save(any(Vehicle.class));
   }
 
@@ -91,7 +96,7 @@ class VehicleServiceTest {
             dealerId, "Test Model", new BigDecimal("10000.00"), VehicleStatus.AVAILABLE);
 
     doNothing().when(createVehicleValidator).validate(request);
-    when(dealerLookupService.getDealerOrThrow(dealerId, tenantId))
+    when(dealerLookupService.getDealerById(dealerId))
         .thenThrow(new ResourceNotFoundException("Dealer not found"));
 
     assertThrows(ResourceNotFoundException.class, () -> vehicleService.save(request));
@@ -118,22 +123,20 @@ class VehicleServiceTest {
   @Test
   void shouldUpdateVehicle_whenDealerIdChanged() {
     UUID newDealerId = UUID.randomUUID();
-    Dealer newDealer = new Dealer();
-    newDealer.setId(newDealerId);
-    newDealer.setTenantId(tenantId);
+    var newDealer = new DealerResponse(newDealerId, null, null, null, null, null);
 
     UpdateVehicleRequest request =
         new UpdateVehicleRequest(newDealerId, "Updated Model", null, null);
 
     when(vehicleRepository.findByIdAndTenantId(vehicleId, tenantId))
         .thenReturn(Optional.of(vehicle));
-    when(dealerLookupService.getDealerOrThrow(newDealerId, tenantId)).thenReturn(newDealer);
+    when(dealerLookupService.getDealerById(newDealerId)).thenReturn(newDealer);
     when(vehicleRepository.save(any(Vehicle.class))).thenReturn(vehicle);
 
     VehicleResponse response = vehicleService.updateVehicle(vehicleId, request);
 
     assertThat(response.model()).isEqualTo("Updated Model");
-    verify(dealerLookupService).getDealerOrThrow(newDealerId, tenantId);
+    verify(dealerLookupService).getDealerById(newDealerId);
     verify(vehicleRepository).save(vehicle);
   }
 

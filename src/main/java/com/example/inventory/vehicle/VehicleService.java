@@ -86,6 +86,8 @@ class VehicleService {
   public void deleteVehicle(UUID id) {
     var tenantId = TenantContext.getTenantId();
     log.info("Delete Vehicle with Tenant ID: {}", tenantId);
+
+    this.getVehicleById(id);
     vehicleRepository.deleteByIdAndTenantId(id, tenantId);
   }
 }
