@@ -13,9 +13,9 @@ import lombok.*;
     indexes = {
       @Index(name = "idx_vehicle_tenant_id", columnList = "tenant_id"),
       @Index(name = "idx_vehicle_dealer_id", columnList = "dealer_id"),
-      @Index(name = "idx_vehicle_status", columnList = "status"),
+      @Index(name = "idx_vehicle_status", columnList = "vehicle_status"),
       @Index(name = "idx_vehicle_tenant_dealer", columnList = "tenant_id, dealer_id"),
-      @Index(name = "idx_vehicle_tenant_status", columnList = "tenant_id, status"),
+      @Index(name = "idx_vehicle_tenant_status", columnList = "tenant_id, vehicle_status"),
       @Index(name = "idx_vehicle_tenant_price", columnList = "tenant_id, price")
     })
 public class Vehicle {

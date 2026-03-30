@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 class VehicleService {
 
@@ -48,7 +49,6 @@ class VehicleService {
         .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + id));
   }
 
-  @Transactional
   public VehicleResponse save(CreateVehicleRequest request) {
     var tenantId = TenantContext.getTenantId();
     log.info("Create Vehicle with Tenant ID: {}", tenantId);
@@ -62,15 +62,13 @@ class VehicleService {
             VehicleMapper.toEntity(request, DealerMapper.toEntity(dealer), tenantId)));
   }
 
-  @Transactional
   public VehicleResponse updateVehicle(UUID id, UpdateVehicleRequest request) {
     var tenantId = TenantContext.getTenantId();
     log.info("Update Vehicle with Tenant ID: {}", tenantId);
 
-    var vehicle =
-        this.vehicleRepository
-            .findByIdAndTenantId(id, tenantId)
-            .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + id));
+    var vehicle = this.vehicleRepository
+        .findByIdAndTenantId(id, tenantId)
+        .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found with id: " + id));
 
     // Resolve dealer only if the patch request includes a new dealerId
     DealerResponse dealer = null;
@@ -82,7 +80,6 @@ class VehicleService {
     return VehicleMapper.toResponse(vehicleRepository.save(vehicle));
   }
 
-  @Transactional
   public void deleteVehicle(UUID id) {
     var tenantId = TenantContext.getTenantId();
     log.info("Delete Vehicle with Tenant ID: {}", tenantId);

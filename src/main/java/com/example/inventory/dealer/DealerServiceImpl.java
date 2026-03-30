@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 class DealerServiceImpl implements DealerService {
 
@@ -45,12 +46,10 @@ class DealerServiceImpl implements DealerService {
   public PaginatedResponse<DealerResponse> getAll(Pageable pageable) {
     var tenantId = TenantContext.getTenantId();
     log.info("get page of dealers request from tenant: {}", tenantId);
-    var dealers =
-        dealerRepository.findAllByTenantId(tenantId, pageable).map(DealerMapper::toResponse);
+    var dealers = dealerRepository.findAllByTenantId(tenantId, pageable).map(DealerMapper::toResponse);
     return PaginatedResponse.build(dealers);
   }
 
-  @Transactional
   public DealerResponse save(CreateDealerRequest dealer) {
     var tenantId = TenantContext.getTenantId();
     log.info("create dealer request from tenant: {}", tenantId);
@@ -60,25 +59,22 @@ class DealerServiceImpl implements DealerService {
     return DealerMapper.toResponse(dealerRepository.save(dealerEntity));
   }
 
-  @Transactional
   public DealerResponse updateDealerRequest(UUID id, UpdateDealerRequest updateDealerRequest) {
     var tenantId = TenantContext.getTenantId();
 
     log.info("update dealer request from tenant: {}", tenantId);
-    var savedDealer =
-        dealerRepository
-            .findByIdAndTenantId(id, tenantId)
-            .orElseThrow(() -> new ResourceNotFoundException("Dealer not found with id: " + id));
+    var savedDealer = dealerRepository
+        .findByIdAndTenantId(id, tenantId)
+        .orElseThrow(() -> new ResourceNotFoundException("Dealer not found with id: " + id));
 
     DealerMapper.updateEntity(savedDealer, updateDealerRequest);
     return DealerMapper.toResponse(dealerRepository.save(savedDealer));
   }
 
-  @Transactional
   public void deleteDealer(UUID uuid) {
     var tenantId = TenantContext.getTenantId();
     log.info("delete dealer request from tenant: {}", tenantId);
-    this.getDealerById(uuid);
+    getDealerById(uuid);
     dealerRepository.deleteByIdAndTenantId(uuid, tenantId);
   }
 
@@ -89,7 +85,7 @@ class DealerServiceImpl implements DealerService {
     return counts.stream()
         .collect(
             Collectors.toMap(
-                delaer -> delaer.getSubscriptionType().toString(),
+                dealer -> dealer.getSubscriptionType().toString(),
                 DealerSubscriptionCount::getCount));
   }
 
@@ -100,7 +96,7 @@ class DealerServiceImpl implements DealerService {
     return counts.stream()
         .collect(
             Collectors.toMap(
-                delaer -> delaer.getSubscriptionType().toString(),
+                dealer -> dealer.getSubscriptionType().toString(),
                 DealerSubscriptionCount::getCount));
   }
 }

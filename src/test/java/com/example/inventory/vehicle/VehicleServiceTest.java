@@ -142,6 +142,8 @@ class VehicleServiceTest {
 
   @Test
   void shouldDeleteVehicle_whenValidRequest() {
+    when(vehicleRepository.findByIdAndTenantId(vehicleId, tenantId))
+        .thenReturn(Optional.of(vehicle));
     doNothing().when(vehicleRepository).deleteByIdAndTenantId(vehicleId, tenantId);
 
     vehicleService.deleteVehicle(vehicleId);
