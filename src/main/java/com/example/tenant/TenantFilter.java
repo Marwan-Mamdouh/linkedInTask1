@@ -18,7 +18,9 @@ public class TenantFilter implements Filter {
     var httpRequest = (HttpServletRequest) request;
     String path = httpRequest.getRequestURI();
     // Skip Swagger and actuator endpoints
-    if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") || path.startsWith("/actuator")) {
+    if (path.startsWith("/swagger-ui")
+        || path.startsWith("/v3/api-docs")
+        || path.startsWith("/actuator")) {
       chain.doFilter(request, response);
       return;
     }
